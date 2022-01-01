@@ -4,7 +4,7 @@ from torchmetrics import MeanMetric
 from tqdm.auto import tqdm
 import torch
 
-from aliases import get_loss, get_metric, get_optimizer, camel_to_snake
+from .aliases import get_loss, get_metric, get_optimizer, camel_to_snake
 
 class Trainer():
     def __init__(self, model, loss, metric, optimizer, device='auto'):
