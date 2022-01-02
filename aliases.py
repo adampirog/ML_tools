@@ -39,7 +39,7 @@ def get_optimizer(alias, model_parameters):
     class_name = OPTIMIZERS.get(alias)
 
     if not class_name:
-        raise NotImplementedError(f"Optimizer for aliast: {alias} not found")
+        raise ValueError(f"Couldn't resolve optimizer alias: {alias}")
 
     clss = getattr(optim, class_name)
     return clss(model_parameters)
@@ -48,7 +48,7 @@ def get_metric(alias):
     class_name = METRICS.get(alias)
 
     if not class_name:
-        raise NotImplementedError(f"Metric for aliast: {alias} not found")
+        raise ValueError(f"Couldn't resolve metric alias: {alias}")
 
     clss = getattr(torchmetrics, class_name)
     return clss()
@@ -57,7 +57,7 @@ def get_loss(alias):
     class_name = LOSSES.get(alias)
 
     if not class_name:
-        raise NotImplementedError(f"Loss for aliast: {alias} not found")
+        raise ValueError(f"Couldn't resolve loss alias: {alias}")
 
     clss = getattr(nn, class_name)
     return clss()
