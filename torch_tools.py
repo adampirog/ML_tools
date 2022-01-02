@@ -72,7 +72,7 @@ class Trainer:
 
         return self._fit_dataloader(train_loader, val_loader, epochs, verbose)
 
-    def _fit_dataloader(self, train_loader, val_loader=None, epochs=1,verbose=2):
+    def _fit_dataloader(self, train_loader, val_loader=None, epochs=1, verbose=2):
         if val_loader is None:
             self.validate = False
 
@@ -85,8 +85,9 @@ class Trainer:
 
             if self.validate:
                 self.model.eval()
-                for x_batch, y_batch in val_loader:
-                    self._validation_step(x_batch.to(self.device), y_batch.to(self.device))
+                with torch.no_grad():
+                    for x_batch, y_batch in val_loader:
+                        self._validation_step(x_batch.to(self.device), y_batch.to(self.device))
 
             self._log_progress(verbose)
 
