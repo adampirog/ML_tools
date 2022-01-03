@@ -134,8 +134,9 @@ class Trainer:
         self.val_metric.reset()
 
         self.model.eval()
-        for x_batch, y_batch in tqdm(test_loader, disable=(verbose <= 0)):
-            self._validation_step(x_batch.to(self.device), y_batch.to(self.device))
+        with torch.no_grad():
+            for x_batch, y_batch in tqdm(test_loader, disable=(verbose <= 0)):
+                self._validation_step(x_batch.to(self.device), y_batch.to(self.device))
 
         loss = float(self.val_loss_metric.compute())
         self.val_loss_metric.reset()
