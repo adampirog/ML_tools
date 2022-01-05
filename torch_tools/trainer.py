@@ -3,7 +3,7 @@ from torchmetrics import MeanMetric
 from torch.utils.data import TensorDataset, DataLoader, random_split
 from tqdm.auto import tqdm
 
-from ML_tools.aliases import get_loss, get_metric, get_optimizer, camel_to_snake
+from torch_tools.aliases import get_loss, get_metric, get_optimizer, camel_to_snake
 
 
 class Trainer:
@@ -47,10 +47,11 @@ class Trainer:
             batch_size=1,
             validation_data=None,
             validation_split=0,
+            callbacks=None,
             verbose=2):
 
         if isinstance(x_train, DataLoader):
-            return self._fit_dataloader(x_train, validation_data, epochs, verbose)
+            return self._fit_dataloader(x_train, validation_data, epochs, callbacks, verbose)
 
         train_set = TensorDataset(torch.Tensor(x_train), torch.Tensor(y_train))
         train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
@@ -70,9 +71,9 @@ class Trainer:
                 train_set, val_set = random_split(train_set, (n_train, n_val))
                 val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=True)
 
-        return self._fit_dataloader(train_loader, val_loader, epochs, verbose)
+        return self._fit_dataloader(train_loader, val_loader, epochs, callbacks, verbose)
 
-    def _fit_dataloader(self, train_loader, val_loader=None, epochs=1, verbose=2):
+    def _fit_dataloader(self, train_loader, val_loader=None, epochs=1, callbacks=None, verbose=2):
         if val_loader is None:
             self.validate = False
 
@@ -90,6 +91,10 @@ class Trainer:
                         self._validation_step(x_batch.to(self.device), y_batch.to(self.device))
 
             self._log_progress(verbose)
+            if callbacks:
+                stop_training = [callback.on_epoch_end(self) for callback in callbacks]
+                if any(stop_training):
+                    break
 
         self.model.eval()
         return self.history
