@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 
-from torch_tools.callbacks import EarlyStopping, ModelCheckpoint
+from torch_tools.callbacks import CSVLogger, EarlyStopping, ModelCheckpoint
 
 
 class TestEarlyStopping(unittest.TestCase):
@@ -153,6 +153,49 @@ class TestModelCheckpoint(unittest.TestCase):
 
         string = callback._parse_filepath(trainer)
         self.assertEqual(string, "model_45_78.h5")
+
+
+class CSVLoggerTest(unittest.TestCase):
+
+    def test_file_creation(self):
+        callback = CSVLogger("test.csv")
+        trainer = Mock()
+        trainer.history = {"train_loss": [],
+                           "vall_loss": []}
+
+        callback._create_file(trainer)
+
+    def test_new_file(self):
+        callback = CSVLogger("test.csv")
+        trainer = Mock()
+
+        trainer.history = {"train_loss": [99],
+                           "vall_loss": [55]}
+
+        callback.on_epoch_end(trainer)
+
+    def test_iters(self):
+        callback = CSVLogger("test.csv")
+        trainer = Mock()
+
+        trainer.history = {"train_loss": [99],
+                           "vall_loss": [55]}
+
+        callback.on_epoch_end(trainer)
+
+        trainer.history = {"train_loss": [99, 33],
+                           "vall_loss": [55, 12]}
+
+        callback.on_epoch_end(trainer)
+
+    def test_append(self):
+        callback = CSVLogger("test.csv", append=True)
+        trainer = Mock()
+
+        trainer.history = {"train_loss": [11],
+                           "vall_loss": [12]}
+
+        callback.on_epoch_end(trainer)
 
 
 if __name__ == '__main__':

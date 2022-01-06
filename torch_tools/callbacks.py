@@ -1,3 +1,4 @@
+import csv
 from torch import save as torch_save
 
 
@@ -118,3 +119,37 @@ class ModelCheckpoint:
             torch_save(trainer.model.state_dict(), parsed_filepath)
         else:
             torch_save(trainer.model, parsed_filepath)
+
+
+class CSVLogger:
+    def __init__(self, filename, separator=",", append=False):
+        self.filename = filename
+        self.separator = separator
+        self.append = append
+
+        self.first_epoch = True
+
+    def on_epoch_end(self, trainer):
+        if self.first_epoch and (not self.append):
+            self._create_file(trainer)
+            self._append_to_file(trainer)
+            self.first_epoch = False
+            return False
+
+        self._append_to_file(trainer)
+        return False
+
+    def _create_file(self, trainer):
+        columns = trainer.history.keys()
+        with open(self.filename, 'w', newline='', encoding="utf-8") as handle:
+            writer = csv.writer(handle, delimiter=self.separator)
+            writer.writerow(columns)
+
+    def _append_to_file(self, trainer):
+        row = []
+        for value in trainer.history.values():
+            row.append(value[-1])
+
+        with open(self.filename, 'a', newline='', encoding="utf-8") as handle:
+            writer = csv.writer(handle, delimiter=self.separator)
+            writer.writerow(row)
